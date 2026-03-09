@@ -1,0 +1,204 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'dist/**'
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+  push:
+    branches:
+      - dev
+      - v*
+    tags-ignore:
+      - '**'
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'dist/**'
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+jobs:
+  check-syntax:
+    name: Check syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - run: npm run-script lint:check
+
+  check-dist:
+    name: Check dist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - run: rm -rf ./dist
+      - run: npm run-script build
+      - name: Check changes
+        run: |
+          if ! git diff --quiet; then
+            echo "Changes detected in dist folder. Please commit the changes to the dist folder before pushing."
+            git diff --name-only
+            exit 1
+          fi
+
+  jest:
+    name: Run Jest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - run: npm run-script test:coverage -- --color
+      - uses: coverallsapp/github-action@v2
+        with:
+          parallel: false
+          format: clover
+          file: ./coverage/clover.xml
+
+  test-non-windows:
+    name: Test on Ubuntu
+    runs-on: ubuntu-latest
+    needs:
+      - check-syntax
+      - check-dist
+      - jest
+    steps:
+      - name: Download action
+        run: |
+          curl -sSLf -o- \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            'https://api.github.com/repos/${{ github.repository }}/tarball/${{ github.ref }}' \
+            | tar -xz --strip-components=1
+      - name: Test (should silently skip)
+        uses: ./
+        with:
+          if-not-windows: ignore
+          debug: true
+      - name: Test (should warn and continue)
+        uses: ./
+        with:
+          if-not-windows: warn
+          debug: true
+      - name: Test (should fail)
+        id: fail-01
+        continue-on-error: true
+        uses: ./
+        with:
+          if-not-windows: fail
+          debug: true
+      - name: Stop if execution was successful
+        if: steps.fail-01.outcome == 'success'
+        run: exit 1
+
+  test-windows:
+    needs:
+      - check-syntax
+      - check-dist
+      - jest
+    name: Test on Windows
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Download action
+        run: |
+          $headers = @{
+            'Authorization' = 'Bearer ${{ secrets.GITHUB_TOKEN }}'
+            'Accept' = 'application/vnd.github+json'
+          }
+          Invoke-WebRequest `
+            -Uri 'https://api.github.com/repos/${{ github.repository }}/tarball/${{ github.ref }}' `
+            -Headers $headers `
+            -OutFile archive.tar.gz
+            tar -xz --strip-components=1 -f archive.tar.gz
+            Remove-Item -Path archive.tar.gz -Force
+      - name: Run action
+        id: execute1
+        uses: ./
+        with:
+          update-env: false
+          debug: true
+      - name: Dump outputs (except "all")
+        env:
+          OUTPUTS: ${{ toJson(steps.execute1.outputs) }}
+        run: |
+          "$env:OUTPUTS" | ConvertFrom-Json | Select-Object -Property * -ExcludeProperty all | Format-List
+      - name: Dump outputs (values of "all")
+        env:
+          ALL_OUTPUT: ${{ steps.execute1.outputs.all }}
+        run: |
+          "$env:ALL_OUTPUT" | ConvertFrom-Json | Format-List
+      - name: Check that environment variables were not updated
+        run: |
+          if ($env:INCLUDE) {
+            Write-Error 'Environment variables were updated, but update-env was set to false'
+            exit 1
+          }
+      - name: Check that paths were not canonicalized
+        env:
+          PATH_OUTOUT: ${{ steps.execute1.outputs.path }}
+        run: |
+          if ($env:PATH_OUTOUT -and -not $env:PATH_OUTOUT.Contains('\;')) {
+            Write-Error 'Paths were canonicalized, but canonicalize-paths was set to false'
+            exit 1
+          }
+      - name: Run action (canonicalizing paths)
+        id: execute2
+        uses: ./
+        with:
+          update-env: false
+          canonicalize-paths: true
+          debug: true
+      - name: Check that environment variables were not updated
+        run: |
+          if ($env:INCLUDE) {
+            Write-Error 'Environment variables were updated, but update-env was set to false'
+            exit 1
+          }
+      - name: Check that paths were not canonicalized
+        env:
+          PATH_OUTOUT: ${{ steps.execute2.outputs.path }}
+        run: |
+          if ($env:PATH_OUTOUT -and $env:PATH_OUTOUT.Contains('\;')) {
+            Write-Error 'Paths were not canonicalized, but canonicalize-paths was set to true'
+            exit 1
+          }
+      - name: Run action (updating environment variables)
+        uses: ./
+        with:
+          canonicalize-paths: true
+          debug: true
+      - name: Check that environment variables were updated
+        run: |
+          if (-not $env:INCLUDE) {
+            Write-Error 'INCLUDE environment variables was not set'
+            exit 1
+          }
+          if (-not $env:LIB) {
+            Write-Error 'LIB environment variables was not set'
+            exit 1
+          }
+      - name: Check that CL.exe is in PATH
+        run: |
+          $cl = Get-Command cl.exe -ErrorAction SilentlyContinue
+          if (-not $cl) {
+            Write-Error 'cl.exe was not found in PATH'
+            exit 1
+          }
+          Write-Output "cl.exe found at: $($cl.Source)"

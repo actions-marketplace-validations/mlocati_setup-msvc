@@ -1,0 +1,53 @@
+{
+  "name": "@mlocati/setup-msvc",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A GitHub Action that configures the Visual C++ environment by invoking vcvarsall.bat",
+  "keywords": [
+    "windows",
+    "visual-studio",
+    "visual-c++",
+    "visualcpp",
+    "vcvarsall.bat",
+    "vsdevcmd.bat",
+    "github",
+    "action"
+  ],
+  "homepage": "https://github.com/mlocati/setup-msvc",
+  "bugs": {
+    "url": "https://github.com/mlocati/setup-msvc/issues"
+  },
+  "license": "MIT",
+  "author": "Michele Locati <michele@locati.it>",
+  "engines": {
+    "node": "^20.20"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "lint:check": "prettier --check .prettierrc package.json jest.config.* package.json rollup.config.* tsconfig.json \"src/**/*.ts\"",
+    "lint:fix": "prettier --write .prettierrc package.json jest.config.* package.json rollup.config.* tsconfig.json \"src/**/*.ts\"",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "test:coverage": "jest --coverage",
+    "prebuild": "shx rm -rf dist",
+    "build": "npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript"
+  },
+  "dependencies": {
+    "@actions/core": "^3.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.19.37",
+    "jest": "^30.2.0",
+    "prettier": "^3.8.1",
+    "rollup": "^4.59.0",
+    "shx": "^0.4.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3"
+  }
+}
