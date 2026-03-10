@@ -60,7 +60,7 @@ steps:
 |:---|:---|:---|
 | `vs-version` | Visual Studio version (`latest`, `2022`, `17`, …) | `latest` |
 | `architecture` | Target architecture for MSVC tools | *detected automatically* |
-| `platform-type` | `store`, `uwp`, or empty for classic desktop | *empty* |
+| `platform-type` | `desktop` (or empty), `store`, or `uwp` | `desktop` |
 | `windows-sdk-version` | Windows SDK version | *detected automatically* |
 | `toolset-version` | MSVC toolset version | *detected automatically* |
 | `spectre-mode` | Enable Spectre mitigation (`true`/`false`) | `false` |

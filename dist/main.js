@@ -29315,6 +29315,7 @@ var Architecture;
 })(Architecture || (Architecture = {}));
 var PlatformType;
 (function (PlatformType) {
+    PlatformType["Desktop"] = "desktop";
     PlatformType["Store"] = "store";
     PlatformType["UWP"] = "uwp";
 })(PlatformType || (PlatformType = {}));
@@ -29324,7 +29325,7 @@ var PlatformType;
 function buildArgumentsFromInputs(inputs) {
     const args = [];
     args.push(inputs.architecture);
-    if (inputs.platformType !== null) {
+    if (inputs.platformType !== PlatformType.Desktop) {
         args.push(inputs.platformType);
     }
     if (inputs.windowsSdkVersion !== null) {
@@ -29498,7 +29499,8 @@ function resolvePlatformType(platformType) {
     platformType = platformType.trim();
     switch (platformType.toLowerCase()) {
         case '':
-            return null;
+        case 'desktop':
+            return PlatformType.Desktop;
         case 'store':
             return PlatformType.Store;
         case 'uwp':
