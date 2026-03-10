@@ -29852,9 +29852,10 @@ async function run() {
         }
         info(`Visual Studio: ${vc.vsVersion.year}`);
         info(`Visual C++ path: ${vc.path}`);
-        info(`Toolset version: ${vars.has('VCToolsVersion') ? vars.get('VCToolsVersion') : '?'}`);
-        info(`Host architecture: ${vars.has('VSCMD_ARG_HOST_ARCH') ? vars.get('VSCMD_ARG_HOST_ARCH') : '?'}`);
-        info(`Target architecture: ${vars.has('VSCMD_ARG_TGT_ARCH') ? vars.get('VSCMD_ARG_TGT_ARCH') : '?'}`);
+        info(`Toolset version: ${vars.get('VCToolsVersion') ?? '?'}`);
+        info(`Windows SDK version: ${vars.get('WindowsSDKVersion')?.replace(/[\/\\]+/, '') ?? '?'}`);
+        info(`Host architecture: ${vars.get('VSCMD_ARG_HOST_ARCH') ?? '?'}`);
+        info(`Target architecture: ${vars.get('VSCMD_ARG_TGT_ARCH') ?? '?'}`);
     }
     catch (error) {
         setFailed(error instanceof Error ? error : String(error));

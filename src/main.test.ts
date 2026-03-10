@@ -42,6 +42,7 @@ describe('main.ts execution flow', () => {
     (inspectVCVarsAllEnvironmentVariables as jest.Mock).mockResolvedValue(
       new Map([
         ['VCToolsVersion', '14.44.35207'],
+        ['WindowsSDKVersion', '10.0.26100.0\\'],
         ['VSCMD_ARG_HOST_ARCH', 'x64'],
         ['VSCMD_ARG_TGT_ARCH', 'x86'],
       ]),
@@ -53,6 +54,7 @@ describe('main.ts execution flow', () => {
     expect(core.getLoggedMessages()).toContain('INFO: Visual Studio: 2022');
     expect(core.getLoggedMessages()).toContain('INFO: Visual C++ path: C:\\VS\\Path');
     expect(core.getLoggedMessages()).toContain('INFO: Toolset version: 14.44.35207');
+    expect(core.getLoggedMessages()).toContain('INFO: Windows SDK version: 10.0.26100.0');
     expect(core.getLoggedMessages()).toContain('INFO: Host architecture: x64');
     expect(core.getLoggedMessages()).toContain('INFO: Target architecture: x86');
   });

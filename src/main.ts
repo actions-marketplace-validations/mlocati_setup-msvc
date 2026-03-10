@@ -24,9 +24,10 @@ export async function run(): Promise<void> {
     }
     log.info(`Visual Studio: ${vc.vsVersion.year}`);
     log.info(`Visual C++ path: ${vc.path}`);
-    log.info(`Toolset version: ${vars.has('VCToolsVersion') ? vars.get('VCToolsVersion') : '?'}`);
-    log.info(`Host architecture: ${vars.has('VSCMD_ARG_HOST_ARCH') ? vars.get('VSCMD_ARG_HOST_ARCH') : '?'}`);
-    log.info(`Target architecture: ${vars.has('VSCMD_ARG_TGT_ARCH') ? vars.get('VSCMD_ARG_TGT_ARCH') : '?'}`);
+    log.info(`Toolset version: ${vars.get('VCToolsVersion') ?? '?'}`);
+    log.info(`Windows SDK version: ${vars.get('WindowsSDKVersion')?.replace(/[\/\\]+/, '') ?? '?'}`);
+    log.info(`Host architecture: ${vars.get('VSCMD_ARG_HOST_ARCH') ?? '?'}`);
+    log.info(`Target architecture: ${vars.get('VSCMD_ARG_TGT_ARCH') ?? '?'}`);
   } catch (error: Error | unknown) {
     core.setFailed(error instanceof Error ? error : String(error));
   }
