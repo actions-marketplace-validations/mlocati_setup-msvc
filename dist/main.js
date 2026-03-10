@@ -28881,7 +28881,7 @@ function warning$1(message, properties = {}) {
  * Writes info to log with console.log.
  * @param message info message
  */
-function info(message) {
+function info$1(message) {
     process.stdout.write(message + os.EOL);
 }
 /**
@@ -28907,11 +28907,14 @@ function setDebug(value) {
 }
 function debug(message) {
     if (enableDebug) {
-        info(message);
+        info$1(message);
     }
     else if (isDebug()) {
         debug$1(message);
     }
+}
+function info(message) {
+    info$1(message);
 }
 function warning(message) {
     warning$1(message);
@@ -29845,6 +29848,11 @@ async function run() {
         if (inputs.updateEnv) {
             updateEnv(vars);
         }
+        info(`Visual Studio: ${vc.vsVersion.year}`);
+        info(`Visual C++ path: ${vc.path}`);
+        info(`Toolset version: ${vars.has('VCToolsVersion') ? vars.get('VCToolsVersion') : '?'}`);
+        info(`Host architecture: ${vars.has('VSCMD_ARG_HOST_ARCH') ? vars.get('VSCMD_ARG_HOST_ARCH') : '?'}`);
+        info(`Target architecture: ${vars.has('VSCMD_ARG_TGT_ARCH') ? vars.get('VSCMD_ARG_TGT_ARCH') : '?'}`);
     }
     catch (error) {
         setFailed(error instanceof Error ? error : String(error));
