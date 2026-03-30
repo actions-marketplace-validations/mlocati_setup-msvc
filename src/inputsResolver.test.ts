@@ -76,7 +76,7 @@ describe('resolveArchitecture', () => {
     expect(resolveArchitecture(variant)).toBe(Architecture.x64_arm32);
   });
 
-  const x64arm64Variants = ['amd64_arm64', 'x64_arm64', '\tX64_ARM64', '\tAMD64_ARM64', '\tAMD64-ARM64\n'];
+  const x64arm64Variants = ['amd64_arm64', 'x64_arm64', '\tX64_ARM64', '\tAMD64_ARM64', '\tAMD64-ARM64\n', 'ArM64'];
   it.each(x64arm64Variants)('should resolve x64_arm64 architectures correctly for %s', (variant) => {
     expect(resolveArchitecture(variant)).toBe(Architecture.x64_arm64);
   });

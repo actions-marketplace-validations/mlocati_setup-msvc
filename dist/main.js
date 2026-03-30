@@ -29493,6 +29493,7 @@ function resolveArchitecture(architecture) {
             return Architecture.x64_arm32;
         case 'amd64_arm64':
         case 'x64_arm64':
+        case 'arm64':
             return Architecture.x64_arm64;
         default:
             throw new Error(`Unsupported architecture: ${architecture}`);
